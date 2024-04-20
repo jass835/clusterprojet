@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Chemin vers le fichier CSV
-file_path = '2d_data.csv'
+file_path = '3d_data.csv'
 
 # Nombre de clusters
 k = 10
