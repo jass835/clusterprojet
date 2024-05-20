@@ -3,105 +3,117 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-def read_csv(file_path):
+def lire_csv(chemin_fichier):
     """
     Fonction pour lire les données à partir d'un fichier CSV (en sautant la première ligne si elle contient des en-têtes).
     
     Args:
-    file_path (str): Chemin vers le fichier CSV.
+    chemin_fichier (str): Chemin vers le fichier CSV.
     
     Returns:
     numpy.ndarray: Tableau numpy contenant les points de données.
     """
-    data = np.loadtxt(file_path, delimiter=',', skiprows=1)
-    return data
+    donnees = np.loadtxt(chemin_fichier, delimiter=',', skiprows=1)
+    return donnees
 
-def initialize_centroids(data, k):
+def initialiser_centroides(donnees, k):
     """
-    Fonction pour initialiser les centroïdes pour l'algorithme k-means.
+    Fonction pour initialiser les centroids pour l'algorithme k-means.
     
     Args:
-    data (numpy.ndarray): Tableau numpy contenant les points de données.
+    donnees (numpy.ndarray): Tableau numpy contenant les points de données.
     k (int): Nombre de clusters.
     
     Returns:
-    numpy.ndarray: Tableau numpy contenant les centroïdes initialisés.
+    numpy.ndarray: Tableau numpy contenant les centroids initialisés.
     """
-    centroids = data[random.sample(range(len(data)), k)]
-    return centroids
+    centroides = donnees[random.sample(range(len(donnees)), k)]
+    return centroides
 
-def assign_points_to_clusters(data, centroids):
+def assigner_points_aux_clusters(donnees, centroides):
     """
-    Fonction pour assigner les points aux clusters en fonction des centroïdes les plus proches.
+    Fonction pour assigner les points aux clusters en fonction des centroids les plus proches.
     
     Args:
-    data (numpy.ndarray): Tableau numpy contenant les points de données.
-    centroids (numpy.ndarray): Tableau numpy contenant les centroïdes.
+    donnees (numpy.ndarray): Tableau numpy contenant les points de données.
+    centroides (numpy.ndarray): Tableau numpy contenant les centroids.
     
     Returns:
     numpy.ndarray: Tableau numpy contenant les affectations de cluster pour chaque point.
     """
-    distances = np.sqrt(((data[:, np.newaxis] - centroids) ** 2).sum(axis=2))
-    cluster_assignments = np.argmin(distances, axis=1)
-    return cluster_assignments
+    distances = np.sqrt(((donnees[:, np.newaxis] - centroides) ** 2).sum(axis=2))
+    affectations_clusters = np.argmin(distances, axis=1)
+    return affectations_clusters
 
-def calculate_quality_statistic(data, centroids, cluster_assignments):
+def calculer_statistique_qualite(donnees, centroides, affectations_clusters):
     """
-    Calculates the quality statistic for k-means clustering.
-
-    Args:
-    data (numpy.ndarray): Tableau numpy contenant les points de données.
-    centroids (numpy.ndarray): Tableau numpy contenant les centroïdes.
-    cluster_assignments (numpy.ndarray): Tableau numpy contenant les affectations de cluster pour chaque point.
-
-    Returns:
-    float: La moyenne des distances entre chaque point de données et son centroïde assigné.
-    """
-    total_distance = np.sum(np.sum((data[i] - centroids[cluster_assignments[i]]) ** 2) for i in range(len(data)))
-    quality_statistic = total_distance / len(data)
-    return quality_statistic
-
-def save_results_to_csv(data, centroids, cluster_assignments, output_file):
-    """
-    Sauvegarde les résultats de k-means dans un fichier CSV avec les coordonnées des centroides.
+    Calcule la statistique de qualité pour le clustering k-means.
     
     Args:
-    data (numpy.ndarray): Tableau numpy contenant les points de données.
-    centroids (numpy.ndarray): Tableau numpy contenant les centroïdes.
-    cluster_assignments (numpy.ndarray): Tableau numpy contenant les affectations de cluster pour chaque point.
-    output_file (str): Chemin vers le fichier CSV de sortie.
+    donnees (numpy.ndarray): Tableau numpy contenant les points de données.
+    centroides (numpy.ndarray): Tableau numpy contenant les centroids.
+    affectations_clusters (numpy.ndarray): Tableau numpy contenant les affectations de cluster pour chaque point.
+    
+    Returns:
+    float: La moyenne des distances entre chaque point de données et son centroid assigné.
     """
-    data_with_centroids = np.hstack((data, centroids[cluster_assignments]))
-    np.savetxt(output_file, data_with_centroids, delimiter=',', header='x,y,centroid_x,centroid_y', comments='')
+    distance_totale = np.sum(np.sum((donnees[i] - centroides[affectations_clusters[i]]) ** 2) for i in range(len(donnees)))
+    statistique_qualite = distance_totale / len(donnees)
+    return statistique_qualite
 
-# Bonus 1: Tracer le graphe de la distance moyenne en fonction du nombre de clusters
-def plot_average_distance(data, max_k):
+def sauvegarder_resultats_csv(donnees, centroides, affectations_clusters, fichier_sortie):
+    """
+    Sauvegarde les résultats de k-means dans un fichier CSV avec les coordonnées des centroids.
+    
+    Args:
+    donnees (numpy.ndarray): Tableau numpy contenant les points de données.
+    centroides (numpy.ndarray): Tableau numpy contenant les centroids.
+    affectations_clusters (numpy.ndarray): Tableau numpy contenant les affectations de cluster pour chaque point.
+    fichier_sortie (str): Chemin vers le fichier CSV de sortie.
+    """
+    donnees_avec_centroides = np.hstack((donnees, centroides[affectations_clusters]))
+    np.savetxt(fichier_sortie, donnees_avec_centroides, delimiter=',', header='x,y,centroid_x,centroid_y', comments='')
+
+def tracer_distance_moyenne(donnees, k_max):
+    """
+    Tracer le graphe de la distance moyenne en fonction du nombre de clusters.
+    
+    Args:
+    donnees (numpy.ndarray): Tableau numpy contenant les points de données.
+    k_max (int): Nombre maximum de clusters à tester.
+    """
     distances = []
-    for k in range(1, max_k + 1):
-        centroids = initialize_centroids(data, k)
-        cluster_assignments = assign_points_to_clusters(data, centroids)
-        distance = calculate_quality_statistic(data, centroids, cluster_assignments)
+    for k in range(1, k_max + 1):
+        centroides = initialiser_centroides(donnees, k)
+        affectations_clusters = assigner_points_aux_clusters(donnees, centroides)
+        distance = calculer_statistique_qualite(donnees, centroides, affectations_clusters)
         distances.append(distance)
-    plt.plot(range(1, max_k + 1), distances)
-    plt.xlabel('Number of clusters')
-    plt.ylabel('Average Distance')
-    plt.title('Average Distance vs Number of Clusters')
+    plt.plot(range(1, k_max + 1), distances)
+    plt.xlabel('Nombre de clusters')
+    plt.ylabel('Distance Moyenne')
+    plt.title('Distance Moyenne vs Nombre de Clusters')
     plt.show()
 
-# Bonus 2: Animation montrant le découpage des données en clusters
-def animate_kmeans(data, frames):
+def animer_kmeans(donnees, frames):
+    """
+    Animation montrant le découpage des données en clusters au fil des itérations.
+    
+    Args:
+    donnees (numpy.ndarray): Tableau numpy contenant les points de données.
+    frames (list): Liste de dictionnaires contenant les centroides et les affectations de clusters pour chaque itération.
+    """
     fig = plt.figure()
-    ax = plt.axes(xlim=(np.min(data[:, 0]), np.max(data[:, 0])), ylim=(np.min(data[:, 1]), np.max(data[:, 1])))
-    scatter = ax.scatter(data[:, 0], data[:, 1], s=10)
-    centroids = frames[0]['centroids']
-    centroids_plot = ax.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='x')
+    ax = plt.axes(xlim=(np.min(donnees[:, 0]), np.max(donnees[:, 0])), ylim=(np.min(donnees[:, 1]), np.max(donnees[:, 1])))
+    scatter = ax.scatter(donnees[:, 0], donnees[:, 1], s=10)
+    centroides = frames[0]['centroides']
+    centroides_plot = ax.scatter(centroides[:, 0], centroides[:, 1], c='red', marker='x')
 
-    def update(frame):
-        cluster_assignments = frame['cluster_assignments']
-        centroids = frame['centroids']
-        scatter.set_array(cluster_assignments)
-        centroids_plot.set_offsets(centroids)
-        return scatter, centroids_plot
+    def mettre_a_jour(frame):
+        affectations_clusters = frame['affectations_clusters']
+        centroides = frame['centroides']
+        scatter.set_array(affectations_clusters)
+        centroides_plot.set_offsets(centroides)
+        return scatter, centroides_plot
 
-    anim = FuncAnimation(fig, update, frames=frames, interval=1000, blit=True)
+    anim = FuncAnimation(fig, mettre_a_jour, frames=frames, interval=1000, blit=True)
     plt.show()

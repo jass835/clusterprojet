@@ -1,46 +1,44 @@
-from clust import read_csv, initialize_centroids, assign_points_to_clusters, save_results_to_csv, calculate_quality_statistic, plot_average_distance, animate_kmeans
+from clust import lire_csv, initialiser_centroides, assigner_points_aux_clusters, sauvegarder_resultats_csv, calculer_statistique_qualite, tracer_distance_moyenne, animer_kmeans
 from drawing import draw
 import numpy as np
-import matplotlib.pyplot as plt
 
-# Chemin vers le fichier CSV
-file_path = '3d_data.csv'
+# Chemin vers le fichier CSV contenant les données
+chemin_fichier = '2d_data.csv'
 
-# Nombre de clusters
-k = 10
+# Nombre de clusters souhaités
+nombre_clusters = 10
 
 # Lire les données à partir du fichier CSV
-data = read_csv(file_path)
+donnees = lire_csv(chemin_fichier)
 
-# Initialiser les centroïdes
-centroids = initialize_centroids(data, k)
+# Initialiser les centroides pour les clusters
+centroides = initialiser_centroides(donnees, nombre_clusters)
 
-# Assigner les points aux clusters
-cluster_assignments = assign_points_to_clusters(data, centroids)
+# Assigner les points de données aux clusters correspondants
+affectations_clusters = assigner_points_aux_clusters(donnees, centroides)
 
-# Calculer la statistique de qualité de k-means
-quality_statistic = calculate_quality_statistic(data, centroids, cluster_assignments)
-print("La statistique de qualité de k-means est :", quality_statistic)
+# Calculer la statistique de qualité du clustering k-means
+statistique_qualite = calculer_statistique_qualite(donnees, centroides, affectations_clusters)
+print("La statistique de qualité du k-means est :", statistique_qualite)
 
 # Afficher les données et leurs assignations de cluster
-draw(data, windowSize=800)
+draw(donnees, windowSize=800)
 
 # Sauvegarder les résultats de k-means dans un fichier CSV
-output_file = 'results.csv'
-save_results_to_csv(data, centroids, cluster_assignments, output_file)
-print("Les résultats de k-means ont été sauvegardés dans", output_file)
+fichier_sortie = 'resultats.csv'
+sauvegarder_resultats_csv(donnees, centroides, affectations_clusters, fichier_sortie)
+print("Les résultats de k-means ont été sauvegardés dans", fichier_sortie)
 
 # Bonus 1: Tracer le graphe de la distance moyenne en fonction du nombre de clusters
-plot_average_distance(data, max_k=10)
+tracer_distance_moyenne(donnees, k_max=10)
 
-# Bonus 2: Animation montrant le découpage des données en clusters
+# Bonus 2: Animation montrant le découpage des données en clusters au fil des itérations
 frames = []
 max_iterations = 10
 for i in range(max_iterations):
-    cluster_assignments = assign_points_to_clusters(data, centroids)
-    frames.append({'centroids': centroids, 'cluster_assignments': cluster_assignments})
-    new_centroids = np.array([np.mean(data[cluster_assignments == j], axis=0) for j in range(k)])
-    centroids = new_centroids
+    affectations_clusters = assigner_points_aux_clusters(donnees, centroides)
+    frames.append({'centroides': centroides, 'affectations_clusters': affectations_clusters})
+    nouveaux_centroides = np.array([np.mean(donnees[affectations_clusters == j], axis=0) for j in range(nombre_clusters)])
+    centroides = nouveaux_centroides
 
-animate_kmeans(data, frames)
-
+animer_kmeans(donnees, frames)
