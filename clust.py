@@ -132,7 +132,9 @@ def animer_kmeans(donnees, frames):
         centroides_plot = ax.scatter(centroides[:, 0], centroides[:, 1], centroides[:, 2], c='red', marker='x')
 
         def mettre_a_jour(frame):
-            ax.collections.clear()
+            # Suppression des anciens artistes
+            for artist in ax.collections:
+                artist.remove()
             affectations_clusters = frame['affectations_clusters']
             centroides = frame['centroides']
             scatter = ax.scatter(donnees[:, 0], donnees[:, 1], donnees[:, 2], c=affectations_clusters, s=10)
