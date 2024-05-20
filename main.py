@@ -39,6 +39,8 @@ for i in range(max_iterations):
     affectations_clusters = assigner_points_aux_clusters(donnees, centroides)
     frames.append({'centroides': centroides, 'affectations_clusters': affectations_clusters})
     nouveaux_centroides = np.array([np.mean(donnees[affectations_clusters == j], axis=0) for j in range(nombre_clusters)])
+    if np.all(centroides == nouveaux_centroides):
+        break
     centroides = nouveaux_centroides
 
 animer_kmeans(donnees, frames)
