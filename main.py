@@ -3,7 +3,7 @@ from drawing import draw
 import numpy as np
 
 # Chemin vers le fichier CSV contenant les données
-chemin_fichier = '3d_data.csv'
+chemin_fichier = '2d_data.csv'
 
 # Nombre de clusters souhaités
 nombre_clusters = 10
